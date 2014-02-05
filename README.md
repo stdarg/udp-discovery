@@ -12,11 +12,11 @@ Invokes the constructor to create an instance of Discovery to receive discovery
 events.  The config options object is optional, but if included, the following
 options are available:
 
-* {Number} `port` - The port to listen upon for service announcements. Default:
+* **Number** `port` - The port to listen upon for service announcements. Default:
   44201.
-* {String} `bindAddr` - The address to bind to. Default: listens to all
+* **String** `bindAddr` - The address to bind to. Default: listens to all
   interfaces.
-* {String} `dgramType` - Either 'udp4' or 'udp6'. Default: 'udp4'.
+* **String** `dgramType` - Either 'udp4' or 'udp6'. Default: 'udp4'.
 
 # Discovery methods
 
@@ -25,45 +25,45 @@ Starts announcing the service at the specified interval. The parameter,
 `serviceObject`, is an object describing the service that udp-discoveryy
 announces.
 
-* {String} `name` The name of the service being announced. It must be unique, or
+* **String** `name` The name of the service being announced. It must be unique, or
   it will collide with another.
-* {Number} `interval` The duration between announcements in milliseconds.
-* {Any} `userData` Any data that can be serialized into JSON.
-* {Boolean} `available` Optional parameter to set availability of the service.
+* **Number** `interval` The duration between announcements in milliseconds.
+* **Any** `userData` Any data that can be serialized into JSON.
+* **Boolean** `available` Optional parameter to set availability of the service.
   If not specified, the default is 'true', meaning available.
 
 Any property with a default can be left out and the code supplies the default
 value. The name and data are required.
 
 ## pause(name)
-- {String} `name` The name of the service.
-- Returns true if successful, false otherwise.
+- **String** `name` The name of the service.
+- *Returns* true if successful, false otherwise.
 
 Halts announcements.
 
 ## resume(name, \[,interval\])
-- {String} `name` name of the service.
-- {Number} [`interval`] optional interval between announcements in ms.
-- Returns true if successful, false otherwise.
+- **String** `name` name of the service.
+- **Number** [`interval`] optional interval between announcements in ms.
+- *Returns* true if successful, false otherwise.
 
 Resumes the announcements at the time interval.
 
 ## getData(name)
-- {String} `name` name of the service.
-- Returns {Object} serviceObject from announce.
+- **String** `name` name of the service.
+- *Returns* **Object** serviceObject from announce.
 
-Returns the service object, which can be modified. For example, if you need to
+*Returns* the service object, which can be modified. For example, if you need to
 alter the `userData`, you can. You cannot, however, alter the name (it's a
 constant property).
 
 ## update(name, userData \[,interval\] \[,available\])
 Updates the existing service.
 
-* {String} `name` The name of the service being announced. It must be unique, or
+* **String** `name` The name of the service being announced. It must be unique, or
   it will collide with another.
-* {Any} `userData` Any data that can be serialized into JSON.
-* {Number} [`interval`] Optional duration between announcements in milliseconds.
-* {Boolean} [`available`] Optional parameter to set availability of the service.
+* **Any** `userData` Any data that can be serialized into JSON.
+* **Number** [`interval`] Optional duration between announcements in milliseconds.
+* **Boolean** [`available`] Optional parameter to set availability of the service.
   If not specified, the default is 'true', meaning available.
 
 # Discovery Events
@@ -71,9 +71,9 @@ Updates the existing service.
 ## 'available'
 Has the following parameters:
 
-- {String} `name` name of the service.
-- {Object} `data` user-defined object describing the service.
-- {String} `reason` why this event was sent: 'new', 'availabilityChange',
+- **String** `name` name of the service.
+- **Object** `data` user-defined object describing the service.
+- **String** `reason` why this event was sent: 'new', 'availabilityChange',
   'timedOut'.
 
 This event can happen when:
@@ -84,9 +84,9 @@ This event can happen when:
 ## 'unavailable'
 Has the following parameters:
 
-- {String} `name` name of the service.
-- {Object} `data` user-defined object describing the service.
-- {String} `reason` why this event was sent: 'new', 'availabilityChange',
+- **String** `name` name of the service.
+- **Object** `data` user-defined object describing the service.
+- **String** `reason` why this event was sent: 'new', 'availabilityChange',
   'timedOut'.
 
 This event can happen when:
