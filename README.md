@@ -10,7 +10,7 @@ nodes on the same subnet as typically, broadcast packets don't route.
 
 # Example
 
-## Applicating sending advertisements
+## Application sending advertisements
 
 ```JavaScript
 var Discovery = require('udp-discovery').Discovery;
