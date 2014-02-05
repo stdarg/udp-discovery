@@ -1,12 +1,8 @@
 udp-discovery
 =============
-This module provides discovery services for super-cluster using UDP multicast.
-Later, an expanded implementation able to scaled up to a few thousand instances
-and work across wide area networks.
-
-For now, this implements the zero-configuration UDP multicast discovery. This
-works only between nodes on the same subnet as typically, broadcast packets
-don't route.
+This module provides discovery services using UDP multicast. udp-discovery
+implements the zero-configuration UDP multicast discovery and works only between
+nodes on the same subnet as typically, broadcast packets don't route.
 
 # Discovery constructor
 
@@ -29,12 +25,12 @@ Starts announcing the service at the specified interval. The parameter,
 `serviceObject`, is an object describing the service that udp-discoveryy
 announces.
 
-* {String} `name` The name of the service being announced. It must be unique, or it will
-  collide with another.
+* {String} `name` The name of the service being announced. It must be unique, or
+  it will collide with another.
 * {Number} `interval` The duration between announcements in milliseconds.
 * {Any} `userData` Any data that can be serialized into JSON.
-* {Boolean} `available` Optional parameter to set availability of the service. If not
-  specified, the default is 'true', meaning available.
+* {Boolean} `available` Optional parameter to set availability of the service.
+  If not specified, the default is 'true', meaning available.
 
 Any property with a default can be left out and the code supplies the default
 value. The name and data are required.
@@ -63,12 +59,12 @@ constant property).
 ## update(name, userData \[,interval\] \[,available\])
 Updates the existing service.
 
-* {String} `name` The name of the service being announced. It must be unique, or it will
-  collide with another.
+* {String} `name` The name of the service being announced. It must be unique, or
+  it will collide with another.
 * {Any} `userData` Any data that can be serialized into JSON.
 * {Number} [`interval`] Optional duration between announcements in milliseconds.
-* {Boolean} [`available`] Optional parameter to set availability of the service. If not
-  specified, the default is 'true', meaning available.
+* {Boolean} [`available`] Optional parameter to set availability of the service.
+  If not specified, the default is 'true', meaning available.
 
 # Discovery Events
 
@@ -103,7 +99,7 @@ This event can happen when:
   from the list of services.
 
 # License
-Copyright (c) 201d Edmond Meinfelder
+Copyright (c) 2014 Edmond Meinfelder
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -122,4 +118,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-
