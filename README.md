@@ -8,7 +8,7 @@ For now, this implements the zero-configuration UDP multicast discovery. This
 works only between nodes on the same subnet as typically, broadcast packets
 don't route.
 
-# Discovery API
+# Discovery constructor
 
 ## new Discovery([options])
 
@@ -22,7 +22,9 @@ options are available:
   interfaces.
 * {String} `dgramType` - Either 'udp4' or 'udp6'. Default: 'udp4'.
 
-## Discovery.announce\(name, userData, \[,interval\] \[,available\]\)
+# Discovery methods
+
+## announce(name, userData, \[,interval\] \[,available\])
 Starts announcing the service at the specified interval. The parameter,
 `serviceObject`, is an object describing the service that udp-discoveryy
 announces.
@@ -37,20 +39,20 @@ announces.
 Any property with a default can be left out and the code supplies the default
 value. The name and data are required.
 
-## Discovery.pause\(name\)
+## pause(name)
 - {String} `name` The name of the service.
 - Returns true if successful, false otherwise.
 
 Halts announcements.
 
-## Discovery.resume\(name, \[,interval\]\\)
+## resume(name, \[,interval\])
 - {String} `name` The name of the service.
 - {Number} `interval` Optional interval between announcements in ms.
 - Returns true if successful, false otherwise.
 
 Resumes the announcements at the time interval.
 
-## Discovery.getData\(name\)
+## getData(name)
 - {String} `name `- The name of the service.
 - returns: {Object} The serviceObject from announce.
 
@@ -58,7 +60,7 @@ Returns the service object, which can be modified. For example, if you need to
 alter the `userData`, you can. You cannot, however, alter the name (it's a
 constant property).
 
-## Discovery.update\(name, userData \[,interval\] \[,available\]\)
+## update(name, userData \[,interval\] \[,available\])
 Updates the existing service.
 
 * {String} `name` The name of the service being announced. It must be unique, or it will
@@ -68,9 +70,9 @@ Updates the existing service.
 * {Boolean} [`available`] Optional parameter to set availability of the service. If not
   specified, the default is 'true', meaning available.
 
-## Discovery Events
+# Discovery Events
 
-### 'available'
+## 'available'
 Has the following parameters:
 
 - {String} name - The name of the service.
@@ -83,7 +85,7 @@ This event can happen when:
 - The first announcement for a service is received.
 - The availability changes, if the available status changes from false to true.
 
-### 'unavailable'
+## 'unavailable'
 Has the following parameters:
 
 - {String} name - The name of the service.
