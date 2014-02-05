@@ -42,15 +42,15 @@ value. The name and data are required.
 Halts announcements.
 
 ## resume(name, \[,interval\])
-- {String} `name` The name of the service.
-- {Number} `interval` Optional interval between announcements in ms.
+- {String} `name` name of the service.
+- {Number} [`interval`] optional interval between announcements in ms.
 - Returns true if successful, false otherwise.
 
 Resumes the announcements at the time interval.
 
 ## getData(name)
-- {String} `name `- The name of the service.
-- returns: {Object} The serviceObject from announce.
+- {String} `name` name of the service.
+- Returns {Object} serviceObject from announce.
 
 Returns the service object, which can be modified. For example, if you need to
 alter the `userData`, you can. You cannot, however, alter the name (it's a
@@ -71,9 +71,9 @@ Updates the existing service.
 ## 'available'
 Has the following parameters:
 
-- {String} name - The name of the service.
-- {Object} data - User-defined object describing the service.
-- {String} reason - Why this event was sent: 'new', 'availabilityChange',
+- {String} `name` name of the service.
+- {Object} `data` user-defined object describing the service.
+- {String} `reason` why this event was sent: 'new', 'availabilityChange',
   'timedOut'.
 
 This event can happen when:
@@ -84,9 +84,9 @@ This event can happen when:
 ## 'unavailable'
 Has the following parameters:
 
-- {String} name - The name of the service.
-- {Object} data - User-defined object describing the service.
-- {String} reason - Why this event was sent: 'new', 'availabilityChange',
+- {String} `name` name of the service.
+- {Object} `data` user-defined object describing the service.
+- {String} `reason` why this event was sent: 'new', 'availabilityChange',
   'timedOut'.
 
 This event can happen when:
