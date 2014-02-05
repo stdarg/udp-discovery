@@ -1,0 +1,31 @@
+{
+  "name": "udp-discovery",
+  "version": "0.0.1",
+  "description": "Provides zero-config discovery service using broadcast UDP.",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha --reporter list"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/stdarg/udp-discovery.git"
+  },
+  "keywords": [
+    "discovery",
+    "distributed",
+    "supercluster",
+    "udp",
+    "multicast",
+    "tcp"
+  ],
+  "author": "Edmond Meinfelder",
+  "license": "MIT",
+  "dependencies": {
+    "debug": "0.7.4",
+    "is2": "0.0.12",
+    "obj-to-json": "0.0.2"
+  },
+  "devDependencies": {
+    "mocha": "1.17.1"
+  }
+}
