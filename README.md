@@ -4,6 +4,64 @@ This module provides discovery services using UDP multicast. udp-discovery
 implements the zero-configuration UDP multicast discovery and works only between
 nodes on the same subnet as typically, broadcast packets don't route.
 
+# Installation
+
+    npm install udp-discovery
+
+# Example
+
+## Applicating sending advertisements
+
+```JavaScript
+var Discovery = require('udp-discovery').Discovery;
+var discover = new Discovery();
+
+var name = 'test';
+var interval = 500;
+var available = true;
+
+var serv = {
+  port: 80,
+  proto: 'tcp',
+  addrFamily: 'IPv4',
+  bonus: {
+    name: 'Edmond',
+    day: 2233,
+    week: [ 'monday', 'tuesday', 'wednesday', 'thursday', 'friday' ]
+  }
+};
+
+discover.announce(name, serv, interval, available);
+
+discover.on('MessageBus', function(event, data) {
+  console.log('event:',event);
+  console.log('data:',data);
+});
+```
+
+## Application receiving advertisements
+
+```JavaScript
+var Discovery = require('udp-discovery').Discovery;
+var discover = new Discovery();
+
+discover.on('available', function(name, data, reason) {
+  console.log('available ',name);
+  console.log('data',data);
+  console.log('reason',reason);
+  var obj = {a: 1, b: '2', c: true, d: {e: 333}};
+  discover.sendEvent('Hello', obj);
+
+  console.log(name,':','available:',reason);
+  console.log(data);
+});
+
+discover.on('unavailable', function(name, data, reason) {
+  console.log(name,':','unavailable:',reason);
+  console.log(data);
+});
+```
+
 # Discovery constructor
 
 ## new Discovery([options])
