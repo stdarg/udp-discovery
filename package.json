@@ -1,6 +1,6 @@
 {
-  "name": "udp-discovery",
-  "version": "0.0.4",
+  "name": "udp-discovery-2",
+  "version": "0.0.5",
   "description": "Provides zero-config discovery service using broadcast UDP.",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/stdarg/udp-discovery.git"
+    "url": "git://github.com/escalion/udp-discovery.git"
   },
   "keywords": [
     "discovery",
@@ -18,7 +18,7 @@
     "multicast",
     "tcp"
   ],
-  "author": "Edmond Meinfelder",
+  "author": "Edmond Meinfelder, Ryan Pannell",
   "license": "MIT",
   "dependencies": {
     "debug": "0.7.4",
