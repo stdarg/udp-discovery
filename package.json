@@ -21,11 +21,11 @@
   "author": "Edmond Meinfelder",
   "license": "MIT",
   "dependencies": {
-    "debug": "0.7.4",
-    "is2": "0.0.12",
-    "obj-to-json": "0.0.2"
+    "debug": "4.1.1",
+    "is2": "2.0.1",
+    "obj-to-json": "1.0.0"
   },
   "devDependencies": {
-    "mocha": "1.17.1"
+    "mocha": "6.1.4"
   }
 }
