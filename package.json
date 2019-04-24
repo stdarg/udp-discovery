@@ -18,7 +18,7 @@
     "multicast",
     "tcp"
   ],
-  "author": "Edmond Meinfelder",
+  "author": "Edmond Meinfelder, Ryan Pannell",
   "license": "MIT",
   "dependencies": {
     "debug": "4.1.1",

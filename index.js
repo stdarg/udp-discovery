@@ -25,6 +25,7 @@ var DEFAULT_TIMEOUT = 1000;
 var DEFAULT_INTERVAL = 3000;
 var DEFAULT_DGRAM_TYPE = 'udp4'; // could also be 'udp6'
 var GLOBAL_EVENT_NAME = 'MessageBus';
+var DEFAULT_REUSE_ADDR = true;
 
 // We use events and must inherit from events.EventEmitter
 util.inherits(Discovery, events.EventEmitter);
@@ -52,7 +53,8 @@ function Discovery(options) {
     // Create a dgram socket and bind it
     self.dgramType = (options && options.dgramType) ?
                       options.dgramType.toLowerCase() : DEFAULT_DGRAM_TYPE;
-    self.socket = dgram.createSocket(self.dgramType);
+    self.reuseaddr = (options && options.reuseaddr) ? options.reuseaddr : DEFAULT_REUSE_ADDR;
+    self.socket = dgram.createSocket({type: self.dgramType, reuseAddr: self.reuseaddr});
     self.port = (options && options.port) ? options.port : DEFAULT_UDP_PORT;
     self.bindAddr = (options && options.bindAddr) ? options.bindAddr :
                      undefined;
