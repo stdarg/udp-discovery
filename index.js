@@ -428,7 +428,7 @@ Discovery.prototype.sendAnnounce = function(data) {
     }
 
     // send the stringified buffer over multicast
-    var buf = new Buffer(str);
+    var buf = new Buffer.alloc(str.length, str);
     this.socket.send(buf, 0, buf.length, this.port, MULTICAST_ADDRESS);
 };
 
