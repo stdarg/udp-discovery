@@ -4,7 +4,10 @@
   "description": "Provides zero-config discovery service using broadcast UDP.",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha --reporter list"
+    "test": "./node_modules/.bin/mocha --reporter list",
+    "build": "tsc -p tsconfig.json",
+    "lint-staged": "lint-staged",
+    "lint": "eslint ./src --ext .ts"
   },
   "repository": {
     "type": "git",
@@ -21,18 +24,24 @@
   "author": "Edmond Meinfelder, Ryan Pannell",
   "license": "MIT",
   "dependencies": {
-    "debug": "4.1.1",
-    "is2": "2.0.1",
-    "obj-to-json": "1.0.0"
+    "debug": "4.3.1"
   },
   "devDependencies": {
-    "@types/node": "^14.14.8",
-    "ava": "^3.13.0",
-    "lint-staged": "^10.5.3",
+    "@types/node": "^14.14.31",
+    "@types/debug": "^4.1.5",
     "eslint": "^7.15.0",
-    "prettier": "^2.1.2",
-    "mocha": "6.1.4",
+    "@typescript-eslint/eslint-plugin": "^4.8.1",
+    "@typescript-eslint/parser": "^4.8.1",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-ava": "^11.0.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-simple-import-sort": "^6.0.0",
     "husky": "^4.3.0",
+    "lint-staged": "^10.5.3",
+    "mocha": "6.1.4",
+    "prettier": "^2.1.2",
     "typescript": "^4.0.5"
   },
   "husky": {
@@ -41,4 +50,7 @@
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
+  "lint-staged": {
+    "./src/*.ts": "eslint"
+  }
 }

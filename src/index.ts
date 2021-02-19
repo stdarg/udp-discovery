@@ -1,16 +1,11 @@
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-continue */
-/* eslint-disable no-restricted-globals */
-/* eslint-disable guard-for-in */
-/* eslint-disable max-lines-per-function */
 /* global NodeJS */
+import { log } from "debug";
 import * as dgram from "dgram";
 import { EventEmitter } from "events";
 import * as util from "util";
 
 const { inspect } = util;
-// eslint-disable-next-line no-console
-const Log = (...args: Array<any>) => console.log(...args);
+const Logger = (...args: Array<any>) => log(...args);
 
 enum dgramTypes {
   UDP4 = "udp4",
@@ -78,15 +73,47 @@ interface UDPInterface {
 
 const isLibrary = {
   nonEmptyObj: (object: object) => Object.keys(object).length > 0,
-  nonEmptyStr: (value: any): boolean => typeof value === "string" && value !== "",
-  nonEmptyArray: (value: any): boolean => Array.isArray(value) && value.length > 0,
-  isFunction: (value: any): boolean => !!(value && value.constructor && value.call && value.apply),
+  nonEmptyStr: (value: any): boolean =>
+    typeof value === "string" && value !== "",
+  nonEmptyArray: (value: any): boolean =>
+    Array.isArray(value) && value.length > 0,
+  isFunction: (value: any): boolean =>
+    !!(value && value.constructor && value.call && value.apply),
 };
 
 const objToJson = {
   jsonParse: <T>(value: string): T | undefined => JSON.parse(value),
   copyObj: <T>(value: T): T => ({ ...value }),
   jsonStringify: (value: object): string => JSON.stringify(value),
+};
+
+const createServiceObject = (
+  name: string,
+  interval: number,
+  data: {
+    [key: string]: any;
+  },
+  available: boolean,
+  local: boolean | undefined,
+  rinfo: TRsInfoObject | undefined
+): IServiceObject => ({
+  name,
+  interval,
+  data,
+  available,
+  local,
+  address: rinfo && rinfo.address ? rinfo.address : undefined,
+  lastAnnTm: Date.now(),
+  intervalId: undefined,
+});
+
+const lockNameProperty = (name: string, service: IServiceObject): void => {
+  Object.defineProperty(service, "name", {
+    value: name,
+    writable: false,
+    enumerable: true,
+    configurable: true,
+  });
 };
 
 /**
@@ -116,8 +143,12 @@ export class UDP extends EventEmitter implements UDPInterface {
     this.port = options.port || defaultOptions.DEFAULT_UDP_PORT;
     this.bindAddress = options.bindAddress;
     this.dgramType = options.type || dgramTypes.UDP4;
-    this.timeOutIntervalTime = options.timeOutIntervalTime || defaultOptions.DEFAULT_TIMEOUT;
-    this.socket = dgram.createSocket({ type: this.dgramType, reuseAddr: this.reuseAddress });
+    this.timeOutIntervalTime =
+      options.timeOutIntervalTime || defaultOptions.DEFAULT_TIMEOUT;
+    this.socket = dgram.createSocket({
+      type: this.dgramType,
+      reuseAddr: this.reuseAddress,
+    });
 
     this.socket.bind(this.port, this.bindAddress);
 
@@ -132,10 +163,12 @@ export class UDP extends EventEmitter implements UDPInterface {
 
     this.socket.on("message", (message, rinfo) => {
       if (message) {
-        const obj = <TAnnouncementObject>objToJson.jsonParse(message.toString());
+        const obj = <TAnnouncementObject>(
+          objToJson.jsonParse(message.toString())
+        );
 
         if (!obj) {
-          Log(`bad announcement: ${message.toString()}`);
+          Logger(`bad announcement: ${message.toString()}`);
 
           return;
         }
@@ -160,14 +193,14 @@ export class UDP extends EventEmitter implements UDPInterface {
   handleAnnouncement(ann: TAnnouncementObject, rinfo: TRsInfoObject): boolean {
     // ensure the ann is an object that is not empty
     if (!isLibrary.nonEmptyObj(ann)) {
-      Log(`handleAnnouncement bad ann: ${inspect(ann)}`);
+      Logger(`handleAnnouncement bad ann: ${inspect(ann)}`);
 
       return false;
     }
 
     // also, the ann obj needs a name
     if (!ann.name) {
-      Log("handleAnnouncement error: no name.");
+      Logger("handleAnnouncement error: no name.");
 
       return false;
     }
@@ -176,13 +209,26 @@ export class UDP extends EventEmitter implements UDPInterface {
     if (this.services && this.services[ann.name]) {
       this.services[ann.name].lastAnnTm = Date.now();
 
-      return this.updateExisting(ann.name, ann.data, ann.interval, ann.available, rinfo);
+      return this.updateExisting(
+        ann.name,
+        ann.data,
+        ann.interval,
+        ann.available,
+        rinfo
+      );
     }
 
     // the entry is new, add it
     const announce = false;
 
-    return this.addNew(ann.name, ann.data, ann.interval, ann.available, announce, rinfo);
+    return this.addNew(
+      ann.name,
+      ann.data,
+      ann.interval,
+      ann.available,
+      announce,
+      rinfo
+    );
   }
 
   /**
@@ -219,7 +265,9 @@ export class UDP extends EventEmitter implements UDPInterface {
     // if the availability changed, send an event
     if (available !== oldAvail) {
       this.services[name].available = available;
-      const evName = available ? availability.Availabile : availability.Unavailabile;
+      const evName = available
+        ? availability.Availabile
+        : availability.Unavailabile;
       this.emit(evName, name, this.services[name], "availabilityChange");
     }
 
@@ -233,24 +281,63 @@ export class UDP extends EventEmitter implements UDPInterface {
   handleTimeOut() {
     // Also the object should have a services storage on it
     if (!this.services || !Object.keys(this.services).length) {
-      Log("handleTimeOut no services, exiting.");
+      Logger("handleTimeOut no services, exiting.");
 
       return;
     }
 
     const now = Date.now();
 
-    Object.keys(this.services).forEach(name => {
-      if (now - this.services[name].lastAnnTm > 2 * this.services[name].interval) {
-        this.emit(availability.Unavailabile, name, this.services[name], "timedOut");
+    Object.keys(this.services).forEach((name) => {
+      if (
+        now - this.services[name].lastAnnTm >
+        2 * this.services[name].interval
+      ) {
+        this.emit(
+          availability.Unavailabile,
+          name,
+          this.services[name],
+          "timedOut"
+        );
       }
     });
   }
 
   /**
+   * Send new event when service first created
+   * @param {String} name The name of the service to announce. Required.
+   * @param {IServiceObject} service Service to announce.
+   * @param {Boolean} [available] Optional parameter setting the state of the
+   *      service. If not included, the default is true meaning available.
+   */
+  sendNewEvent(name: string, service: IServiceObject, available?: boolean) {
+    const evName = available
+      ? availability.Availabile
+      : availability.Unavailabile;
+    this.emit(evName, name, service, "new");
+  }
+
+  /**
+   * Send announcement of the event
+   * @param {boolean} announce Should the service be continuouusly announced.
+   * @param {IServiceObject} service Service to announce.
+   * @return {NodeJS.Timeout | undefined} interval or undefined.
+   */
+  createIntervalAnnoumcement(
+    interval: number,
+    service: IServiceObject
+  ): NodeJS.Timeout {
+    const sendAnnouncement = () => {
+      this.sendAnnounce(service);
+    };
+
+    return setInterval(sendAnnouncement, interval);
+  }
+
+  /**
    * Adds new announcements to the services object. Takes care of adding missing
    * values that have defaults, making the name property constant, and emitting
-   * the correct events.
+   * the correct events. If local is true, the service is local to this process.
    * @param {String} name The name of the service to announce. Required.
    * @param {Object} userData Any data the user desires, must be serializable to
    *      JSON. Required.
@@ -270,71 +357,48 @@ export class UDP extends EventEmitter implements UDPInterface {
     announce?: boolean,
     rinfo?: TRsInfoObject
   ): boolean {
-    Log("addNew");
+    Logger("addNew");
 
     if (!isLibrary.nonEmptyStr(name)) {
-      Log(`addNew error: missing name: ${inspect(name)}`);
+      Logger(`addNew error: missing name: ${inspect(name)}`);
 
       return false;
     }
 
     if (!userData) {
-      Log("addNew error: no userData: what is being announced?");
+      Logger("addNew error: no userData: what is being announced?");
 
       return false;
     }
 
-    // add defaults, if needed
-    const localInterval = interval > 0 ? interval : defaultOptions.DEFAULT_INTERVAL;
+    const localInterval =
+      interval > 0 ? interval : defaultOptions.DEFAULT_INTERVAL;
 
-    // The entry should not already exist
     if (this.services[name]) {
-      Log(`addNew for '${name}', but it already exists.`);
+      Logger(`addNew for '${name}', but it already exists.`);
 
       return false;
     }
 
-    // this.services[name].announce = announce;
-    // if local is true, the service is local to this process.
-
-    // if there is an rinfo, copy it and place it on the service
-    // we don't need the size parameter, though.
-
-    // update the lanst announcement time to now
-
-    this.services[name] = {
+    const service = createServiceObject(
       name,
-      interval: localInterval,
-      data: userData,
+      localInterval,
+      userData,
       available,
-      local: announce,
-      address: rinfo && rinfo.address ? rinfo.address : undefined,
-      lastAnnTm: Date.now(),
-      intervalId: undefined,
-    };
+      announce,
+      rinfo
+    );
 
-    // set the name property to be read-only - it would be confusing if it
-    // changed as it is also the key.
-    Object.defineProperty(this.services[name], "name", {
-      value: name,
-      writable: false,
-      enumerable: true,
-      configurable: true,
-    });
+    lockNameProperty(name, service);
+    this.services[name] = service;
 
-    // since it's new - send an event
-    const evName = available ? availability.Availabile : availability.Unavailabile;
-    this.emit(evName, name, this.services[name], "new");
+    this.sendNewEvent(name, this.services[name], available);
 
-    // create a function to send the announcement using the closure to retain
-    // the name and this
-    const sendAnnouncement = () => {
-      this.sendAnnounce(this.services[name]);
-    };
-
-    // create an interval task to repeatedly send announcements
     if (announce) {
-      this.services[name].intervalId = setInterval(sendAnnouncement, localInterval);
+      this.services[name].intervalId = this.createIntervalAnnoumcement(
+        localInterval,
+        this.services[name]
+      );
     }
 
     return true;
@@ -348,7 +412,7 @@ export class UDP extends EventEmitter implements UDPInterface {
    */
   sendAnnounce(data: IServiceObject): boolean {
     if (!isLibrary.nonEmptyObj(data)) {
-      Log(`sendAnnounce has a bad param for data: ${inspect(data)}`);
+      Logger(`sendAnnounce has a bad param for data: ${inspect(data)}`);
 
       return false;
     }
@@ -360,14 +424,20 @@ export class UDP extends EventEmitter implements UDPInterface {
     const str = objToJson.jsonStringify(copy);
 
     if (!str) {
-      Log(`objToJson.jsonStringify failed on serice data: ${inspect(data)}`);
+      Logger(`objToJson.jsonStringify failed on serice data: ${inspect(data)}`);
 
       return false;
     }
 
     // send the stringified buffer over multicast
     const buf = Buffer.alloc(str.length, str);
-    this.socket.send(buf, 0, buf.length, this.port, defaultOptions.MULTICAST_ADDRESS);
+    this.socket.send(
+      buf,
+      0,
+      buf.length,
+      this.port,
+      defaultOptions.MULTICAST_ADDRESS
+    );
 
     return true;
   }
@@ -390,19 +460,20 @@ export class UDP extends EventEmitter implements UDPInterface {
     available: boolean = true
   ): boolean {
     if (!isLibrary.nonEmptyStr(name)) {
-      Log(`accounce error: bad name: ${inspect(name)}`);
+      Logger(`accounce error: bad name: ${inspect(name)}`);
 
       return false;
     }
 
     if (!userData) {
-      Log("announce error: no userData: what is being announced?");
+      Logger("announce error: no userData: what is being announced?");
 
       return false;
     }
 
     // add defaults, if needed
-    const localInterval = interval > 0 ? interval : defaultOptions.DEFAULT_INTERVAL;
+    const localInterval =
+      interval > 0 ? interval : defaultOptions.DEFAULT_INTERVAL;
 
     // make a copy of the userData object
     const userDataCopy = <object>objToJson.copyObj(userData);
@@ -411,7 +482,7 @@ export class UDP extends EventEmitter implements UDPInterface {
       return false;
     }
 
-    Log(`userDataCopy:${inspect(userDataCopy)}`);
+    Logger(`userDataCopy:${inspect(userDataCopy)}`);
 
     // attempt to add the announcement return result to user
     const announce = true;
@@ -427,27 +498,27 @@ export class UDP extends EventEmitter implements UDPInterface {
   pause(name: string): boolean {
     // we have to have a name that is string and not empty
     if (!isLibrary.nonEmptyStr(name)) {
-      Log(`stopAnouncement: bad name param: ${inspect(name)}`);
+      Logger(`stopAnouncement: bad name param: ${inspect(name)}`);
 
       return false;
     }
 
     if (!isLibrary.nonEmptyObj(this.services)) {
-      Log("stopAnnounce: There are no services to stop");
+      Logger("stopAnnounce: There are no services to stop");
 
       return false;
     }
 
     // the service has to be already known to stop announcing
     if (!this.services[name]) {
-      Log(`Discovery.stopAnnounce error: no entry for '${name}'`);
+      Logger(`Discovery.stopAnnounce error: no entry for '${name}'`);
 
       return false;
     }
 
     // if there is no task to do the announcing, quit
     if (!this.services[name].intervalId) {
-      Log(`Discovery.stopAnnounce error: not announcing '${name}'`);
+      Logger(`Discovery.stopAnnounce error: not announcing '${name}'`);
 
       return false;
     }
@@ -469,23 +540,24 @@ export class UDP extends EventEmitter implements UDPInterface {
   resume(name: string, interval: number): boolean {
     // we need a name that is a string which is not empty
     if (!isLibrary.nonEmptyStr(name)) {
-      Log(`Discovery.resumeAnnounce error: invalid name: ${inspect(name)}`);
+      Logger(`Discovery.resumeAnnounce error: invalid name: ${inspect(name)}`);
 
       return false;
     }
 
     // the service has to be known to resume
     if (!this.services || !this.services[name]) {
-      Log(`resumeAnnounce error: no entry for '${name}'`);
+      Logger(`resumeAnnounce error: no entry for '${name}'`);
 
       return false;
     }
 
-    this.services[name].interval = interval > 0 ? interval : defaultOptions.DEFAULT_INTERVAL;
+    this.services[name].interval =
+      interval > 0 ? interval : defaultOptions.DEFAULT_INTERVAL;
 
     // there can't be an interval task doing announcing to resume
     if (this.services[name].intervalId) {
-      Log(`resumeAnnounce error: already announcing '${name}'`);
+      Logger(`resumeAnnounce error: already announcing '${name}'`);
 
       return false;
     }
@@ -497,7 +569,10 @@ export class UDP extends EventEmitter implements UDPInterface {
     };
 
     // create an interval task and store the id on the service entry
-    this.services[name].intervalId = setInterval(sendAnnouncement, this.services[name].interval);
+    this.services[name].intervalId = setInterval(
+      sendAnnouncement,
+      this.services[name].interval
+    );
 
     return true;
   }
@@ -521,18 +596,19 @@ export class UDP extends EventEmitter implements UDPInterface {
   ): boolean {
     // we have to have a name that is string and not empty
     if (!isLibrary.nonEmptyStr(name)) {
-      Log(`update error: missing name: ${inspect(name)}`);
+      Logger(`update error: missing name: ${inspect(name)}`);
 
       return false;
     }
 
     if (!userData) {
-      Log("update error: no userData: what is being announced?");
+      Logger("update error: no userData: what is being announced?");
 
       return false;
     }
 
-    const localInterval = interval > 0 ? interval : defaultOptions.DEFAULT_INTERVAL;
+    const localInterval =
+      interval > 0 ? interval : defaultOptions.DEFAULT_INTERVAL;
 
     // make a copy of the userData object
     const userDataCopy = objToJson.copyObj(userData);
@@ -573,60 +649,69 @@ export class UDP extends EventEmitter implements UDPInterface {
    */
   sendEvent(eventName: string, userData: { [key: string]: any }): boolean {
     if (!isLibrary.nonEmptyStr(eventName)) {
-      Log(`sendEvent has a bad param for eventName: ${inspect(eventName)}`);
+      Logger(`sendEvent has a bad param for eventName: ${inspect(eventName)}`);
 
       return false;
     }
 
-    return this.sendEventToAddress(defaultOptions.MULTICAST_ADDRESS, eventName, userData);
+    return this.sendEventToAddress(
+      defaultOptions.MULTICAST_ADDRESS,
+      eventName,
+      userData
+    );
   }
 
   /**
    * Send an event to a service, an array of services, or services matching a
    * query.
    * @param {String|Array|Function} dest The service name, an array of services
-   *      or a query to select serices.
+   *      or a query to select services.
    * @param {String} eventName The name of the event.
    * @param {Object} [data] User data sent along with the event. Optional.
    * @return {Boolean} true on success, false otherwise.
    */
-  sendEventTo(dest: string | Array<string> | Function, eventName: string, data?: object): boolean {
+  sendEventTo(
+    dest: string | Array<string> | Function,
+    eventName: string,
+    data?: object
+  ): boolean {
     if (
       !isLibrary.nonEmptyStr(dest) &&
       !isLibrary.nonEmptyArray(dest) &&
       !isLibrary.isFunction(dest)
     ) {
-      Log(`Discovery.sendEventTo received bad dest parameter: ${inspect(dest)}`);
+      Logger(
+        `Discovery.sendEventTo received bad dest parameter: ${inspect(dest)}`
+      );
 
       return false;
     }
 
     if (!isLibrary.nonEmptyStr(eventName)) {
-      Log(`Discovery.sendEventTo received bad name parameter: ${inspect(eventName)}`);
+      Logger(
+        `Discovery.sendEventTo received bad name parameter: ${inspect(
+          eventName
+        )}`
+      );
 
       return false;
     }
-
-    let i;
 
     // handle the case where dest is a service name
     if (isLibrary.nonEmptyStr(dest)) {
       this.sendEventToService(dest as string, eventName, data);
     } else if (isLibrary.nonEmptyArray(dest)) {
-      for (i = 0; i < dest.length; i += 1) {
-        this.sendEventToService(dest[i], eventName, data);
-      }
+      const queryArray = dest as Array<string>;
+      queryArray.forEach((query) =>
+        this.sendEventToService(query, eventName, data)
+      );
     } else if (isLibrary.isFunction(dest)) {
       const queryFunc = dest as Function;
-      const matches = [];
-      for (i = 0; i < this.services; i += 1) {
-        if (queryFunc(this.services[i]) === true) {
-          matches.push(this.services[i]);
+      Object.keys(this.services).forEach((name) => {
+        if (queryFunc(this.services[name]) === true) {
+          this.sendEventToService(this.services[name].name, eventName, data);
         }
-      }
-      for (i = 0; i < matches.length; i += 1) {
-        this.sendEventToService(matches[i].name, eventName, data);
-      }
+      });
     }
 
     return true;
@@ -642,27 +727,33 @@ export class UDP extends EventEmitter implements UDPInterface {
    */
   sendEventToService(name: string, eventName: string, data?: object): boolean {
     if (!isLibrary.nonEmptyStr(name)) {
-      Log(`Discovery.sendEvent received bad name parameter: ${inspect(name)}`);
+      Logger(
+        `Discovery.sendEvent received bad name parameter: ${inspect(name)}`
+      );
 
       return false;
     }
 
     if (!this.services[name]) {
-      Log(`Discovery.sendEvent no such service name as: ${inspect(name)}`);
+      Logger(`Discovery.sendEvent no such service name as: ${inspect(name)}`);
 
       return false;
     }
 
     if (!isLibrary.nonEmptyStr(eventName)) {
-      Log(`Discovery.sendEvent invalid event name: ${inspect(eventName)}`);
+      Logger(`Discovery.sendEvent invalid event name: ${inspect(eventName)}`);
 
       return false;
     }
 
     if (this.services[name].local) {
       this.emit(defaultOptions.GLOBAL_EVENT_NAME, eventName, data);
-    } else {
-      this.sendEventToAddress(this.services[name].address, eventName, data);
+    } else if (this.services[name].address) {
+      this.sendEventToAddress(
+        this.services[name].address as string,
+        eventName,
+        data
+      );
     }
 
     return true;
@@ -676,15 +767,21 @@ export class UDP extends EventEmitter implements UDPInterface {
    * @return {Boolean} true on success, false otherwise.
    * @private
    */
-  sendEventToAddress(address: string, eventName: string, data?: object): boolean {
+  sendEventToAddress(
+    address: string,
+    eventName: string,
+    data?: object
+  ): boolean {
     if (!isLibrary.nonEmptyStr(eventName)) {
-      Log(`Discovery.sendEventToAddress invalid event name: ${inspect(eventName)}`);
+      Logger(
+        `Discovery.sendEventToAddress invalid event name: ${inspect(eventName)}`
+      );
 
       return false;
     }
 
     if (!isLibrary.nonEmptyStr(address)) {
-      Log(`Discovery.sendEventToAddress invalid addr: ${inspect(address)}`);
+      Logger(`Discovery.sendEventToAddress invalid addr: ${inspect(address)}`);
 
       return false;
     }
@@ -698,12 +795,14 @@ export class UDP extends EventEmitter implements UDPInterface {
     const str = objToJson.jsonStringify(obj);
 
     if (!str) {
-      Log(`Discovery.sendEvent could not stringify data param: ${inspect(data)}`);
+      Logger(
+        `Discovery.sendEvent could not stringify data param: ${inspect(data)}`
+      );
 
       return false;
     }
 
-    const buf = new Buffer(str);
+    const buf = Buffer.alloc(str.length, str);
     this.socket.send(buf, 0, buf.length, this.port, address);
 
     return true;
