@@ -1,41 +1,40 @@
-'use strict';
-var assert = require('assert');
-var Discovery = require('../index.js').Discovery;
-var discover = new Discovery();
+const assert = require("assert");
+const { UDP } = require("../build/index.js");
 
-var serv = {
-    port: 80,
-    proto: 'tcp',
-    annInterval: 1000,
-    addrFamily: 'IPv4',
-    moreData: {
-        name: 'Edmond',
-        day: 2233,
-        week: [ 'monday', 'tuesday', 'wednesday', 'thursday', 'friday' ]
-    }
+const service = {
+  port: 80,
+  proto: "tcp",
+  annInterval: 1000,
+  addrFamily: "IPv4",
+  moreData: {
+    name: "Edmond",
+    day: 2233,
+    week: ["monday", "tuesday", "wednesday", "thursday", "friday"],
+  },
 };
 
-var count = 0;
+const discover = new UDP({ port: service.port, timeOutIntervalTime: service.annInterval });
 
-describe('udp-discovery', function() {
-    it('should send a single initial event and then a time out', function(cb) {
-        this.timeout(22000);
-        discover.on('available', function(name, data, reason) {
-            count++;
-            assert.ok(count === 1);
-            assert.ok(reason==='new');
-        });
+let count = 0;
 
-        discover.on('unavailable', function(name, data, reason) {
-            count++;
-            assert.ok(count === 2);
-            assert.ok(reason==='timedOut');
-            cb();
-        });
-
-        discover.announce('test', serv, 500, true);
-        setTimeout(function() {
-            discover.pause('test');
-        }, 500);
+describe("udp-discovery", () => {
+  it("should send a single initial event and then a time out", done => {
+    discover.on("available", (name, data, reason) => {
+      count += 1;
+      assert.ok(count === 1);
+      assert.ok(reason === "new");
     });
+
+    discover.on("unavailable", (name, data, reason) => {
+      count += 1;
+      assert.ok(count === 2);
+      assert.ok(reason === "timedOut");
+      done();
+    });
+
+    discover.announce(service.moreData.name, service, 500, true);
+    setTimeout(() => {
+      discover.pause(service.moreData.name);
+    }, 500);
+  });
 });

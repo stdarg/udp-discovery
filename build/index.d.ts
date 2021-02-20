@@ -72,7 +72,7 @@ export declare class UDP extends EventEmitter implements UDPInterface {
      * @return {Boolean} true, if successful false otherwise.
      * @private
      */
-    handleAnnouncement(ann: TAnnouncementObject, rinfo: TRsInfoObject): boolean;
+    handleAnnouncement(announcement: TAnnouncementObject, rinfo: TRsInfoObject): boolean;
     /**
      * update an existing service entry. Only works on services created locally.
      * @param {String} name The name of the service to announce. Required.
@@ -122,7 +122,7 @@ export declare class UDP extends EventEmitter implements UDPInterface {
      *      announcement. Default is treu.
      * @return {Boolean} true, if successful false otherwise.
      */
-    addNew(name: string, userData: {
+    addNewService(name: string, userData: {
         [key: string]: any;
     }, interval: number, available?: boolean, announce?: boolean, rinfo?: TRsInfoObject): boolean;
     /**
@@ -193,13 +193,13 @@ export declare class UDP extends EventEmitter implements UDPInterface {
     /**
      * Send an event to a service, an array of services, or services matching a
      * query.
-     * @param {String|Array|Function} dest The service name, an array of services
+     * @param {String|Array|Function} destinationServices The service name, an array of services
      *      or a query to select services.
      * @param {String} eventName The name of the event.
      * @param {Object} [data] User data sent along with the event. Optional.
      * @return {Boolean} true on success, false otherwise.
      */
-    sendEventTo(dest: string | Array<string> | Function, eventName: string, data?: object): boolean;
+    sendEventTo(destinationServices: string | Array<string> | Function, eventName: string, data?: object): boolean;
     /**
      * Send event to either the local process or remote process.
      * @param {String} name The name of the service to receive the message.

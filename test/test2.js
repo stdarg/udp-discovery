@@ -1,43 +1,42 @@
-'use strict';
-var assert = require('assert');
-var Discovery = require('../index.js').Discovery;
-var discover = new Discovery();
+const assert = require("assert");
+const { UDP } = require("../build/index.js");
 
-var serv = {
-    annInterval: 500,
-    port: 80,
-    proto: 'tcp',
-    addrFamily: 'IPv4',
-    userData: {
-        name: 'Edmond',
-        day: 2233,
-        week: [ 'monday', 'tuesday', 'wednesday', 'thursday', 'friday' ]
-    }
+const service = {
+  annInterval: 500,
+  port: 80,
+  proto: "tcp",
+  addrFamily: "IPv4",
+  userData: {
+    name: "Edmond",
+    day: 2233,
+    week: ["monday", "tuesday", "wednesday", "thursday", "friday"],
+  },
 };
 
-var count = 0;
+const discover = new UDP({ port: service.port, timeOutIntervalTime: service.annInterval });
 
-describe('udp-discovery', function() {
-    it('should remove the service from the table in less than 2100 ms', function(cb) {
-        this.timeout(2100);
-        discover.on('available', function(name, data, reason) {
-            count++;
-            assert.ok(count === 1);
-            assert.ok(reason==='new');
-        });
+let count = 0;
 
-        discover.on('unavailable', function(name, data, reason) {
-            count++;
-            assert.ok(count === 2);
-            console.log('reason',reason);
-            assert.ok(reason==='timedOut');
-            assert.ok(typeof discover.services !== 'undefined');
-            console.log(typeof discover.services.test);
-            assert.ok(typeof discover.services.test === 'undefined');
-            cb();
-        });
-
-        discover.announce('test', serv, 500, true);
-        discover.pause('test');
+describe("udp-discovery", () => {
+  it("should remove the service from the table in less than 2100 ms", done => {
+    discover.on("available", (name, data, reason) => {
+      count += 1;
+      assert.ok(count === 1);
+      assert.ok(reason === "new");
     });
+
+    discover.on("unavailable", (name, data, reason) => {
+      count += 1;
+      assert.ok(count === 2);
+
+      assert.ok(reason === "timedOut");
+      assert.ok(typeof discover.services !== "undefined");
+
+      assert.ok(typeof discover.services.test === "undefined");
+      done();
+    });
+
+    discover.announce(service.moreData.name, service, 500, true);
+    discover.pause(service.moreData.name);
+  });
 });
