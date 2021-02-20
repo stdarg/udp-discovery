@@ -1,25 +1,25 @@
-'use strict';
-var Discovery = require('../index.js').Discovery;
-var discover = new Discovery();
+const Discovery = require("../build/index.js").UDP;
 
-var name = 'test';
-var interval = 500;
-var available = true;
+const discover = new Discovery();
 
-var serv = {
+const name = "test";
+const interval = 500;
+const available = true;
+
+const serv = {
   port: 80,
-  proto: 'tcp',
-  addrFamily: 'IPv4',
+  proto: "tcp",
+  addrFamily: "IPv4",
   bonus: {
-    name: 'Edmond',
+    name: "Edmond",
     day: 2233,
-    week: [ 'monday', 'tuesday', 'wednesday', 'thursday', 'friday' ]
-  }
+    week: ["monday", "tuesday", "wednesday", "thursday", "friday"],
+  },
 };
 
 discover.announce(name, serv, interval, available);
 
-discover.on('MessageBus', function(event, data) {
-  console.log('event:',event);
-  console.log('data:',data);
+discover.on("MessageBus", function (event, data) {
+  console.log("event:", event);
+  console.log("data:", data);
 });

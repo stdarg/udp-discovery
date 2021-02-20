@@ -1,4 +1,4 @@
-udp-discovery
+ts-udp-discovery
 =============
 This module provides discovery services using UDP multicast. udp-discovery
 implements the zero-configuration UDP multicast discovery and works only between
