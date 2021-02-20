@@ -1,115 +1,20 @@
 /* global NodeJS */
-import { log } from "debug";
 import * as dgram from "dgram";
 import { EventEmitter } from "events";
 
-const Logger = (...args: Array<any>) => log(...args);
-
-enum dgramTypes {
-  UDP4 = "udp4",
-  UDP6 = "udp6",
-}
-
-enum availability {
-  Availabile = "availabile",
-  Unavailabile = "unavailabile",
-}
-
-enum defaultOptions {
-  MULTICAST_ADDRESS = "224.0.0.234",
-  DEFAULT_UDP_PORT = 44201,
-  DEFAULT_TIMEOUT = 1000,
-  DEFAULT_INTERVAL = 3000,
-  GLOBAL_EVENT_NAME = "MessageBus",
-}
-
-type TAnnouncementObject = {
-  name: string;
-  data: { [key: string]: any };
-  interval: number;
-  available: boolean;
-  eventName?: string;
-};
-
-type TRsInfoObject = {
-  address?: string;
-};
-
-type TUDPServiceDiscoveryOptions = {
-  port: number;
-  timeOutIntervalTime: number;
-  type?: dgramTypes;
-  bindAddress?: string;
-};
-
-interface IService {
-  name: string;
-  interval: number;
-  data: { [key: string]: any };
-  available: boolean;
-  address?: string;
-  local?: boolean;
-}
-
-interface IServiceObject extends IService {
-  lastAnnTm: number;
-  intervalId: NodeJS.Timeout | undefined;
-}
-
-interface IServiceAnnouncement extends IService {
-  lastAnnTm?: number;
-  intervalId?: NodeJS.Timeout;
-}
-
-interface UDPInterface {
-  dgramType: dgramTypes;
-  port: number;
-  socket: dgram.Socket;
-  bindAddress: string | undefined;
-  timeOutId: NodeJS.Timeout | null;
-}
-
-const isLibrary = {
-  nonEmptyObj: (object: object) => Object.keys(object).length > 0,
-  nonEmptyStr: (value: any): boolean => typeof value === "string" && value !== "",
-  nonEmptyArray: (value: any): boolean => Array.isArray(value) && value.length > 0,
-  isFunction: (value: any): boolean => !!(value && value.constructor && value.call && value.apply),
-};
-
-const objToJson = {
-  jsonParse: <T>(value: string): T | undefined => JSON.parse(value),
-  copyObj: <T>(value: T): T => ({ ...value }),
-  jsonStringify: (value: object): string => JSON.stringify(value),
-};
-
-const createServiceObject = (
-  name: string,
-  interval: number,
-  data: {
-    [key: string]: any;
-  },
-  available: boolean,
-  local: boolean | undefined,
-  rinfo: TRsInfoObject | undefined
-): IServiceObject => ({
-  name,
-  interval,
-  data,
-  available,
-  local,
-  address: rinfo && rinfo.address ? rinfo.address : undefined,
-  lastAnnTm: Date.now(),
-  intervalId: undefined,
-});
-
-const lockNameProperty = (name: string, service: IServiceObject): void => {
-  Object.defineProperty(service, "name", {
-    value: name,
-    writable: false,
-    enumerable: true,
-    configurable: true,
-  });
-};
+import { availability, defaultOptions, dgramTypes } from "./enums";
+import {
+  IServiceAnnouncement,
+  IServiceObject,
+  TAnnouncementObject,
+  TRsInfoObject,
+  TUDPServiceDiscoveryOptions,
+  UDPInterface,
+} from "./types";
+import { isLibrary } from "./utils/is";
+import { Logger } from "./utils/logger";
+import { lockNameProperty, objToJson } from "./utils/objects";
+import { createServiceObject } from "./utils/services";
 
 /**
  * Creates a Discovery object. The options object is optional. Supported
