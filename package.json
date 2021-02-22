@@ -1,17 +1,17 @@
 {
-  "name": "udp-discovery",
-  "version": "2.0.1",
+  "name": "ts-udp-discovery",
+  "version": "2.0.2",
   "description": "Provides zero-config discovery service using broadcast UDP.",
   "main": "index.js",
   "scripts": {
-    "test:ci": "ava --tap | tap-xunit > ./test-reports/ava.xml",
+    "test": "ava --tap | tap-xunit > ./test-reports/ava.xml",
     "build": "tsc -p tsconfig.json",
     "lint-staged": "lint-staged",
     "lint": "eslint ./src --ext .ts"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/stdarg/udp-discovery.git"
+    "url": "git://github.com/Tihi321/ts-udp-discovery.git"
   },
   "keywords": [
     "discovery",
@@ -21,7 +21,7 @@
     "multicast",
     "tcp"
   ],
-  "author": "Edmond Meinfelder, Ryan Pannell",
+  "author": "Edmond Meinfelder, Ryan Pannell, Tihomir Selak",
   "license": "MIT",
   "dependencies": {
     "debug": "4.3.1"
@@ -41,6 +41,9 @@
     "commitlint": "^11.0.0",
     "commitlint-config-jira": "^1.4.1",
     "commitlint-plugin-jira-rules": "^1.4.0",
+    "tap-xunit": "^2.4.1",
+    "ts-node-dev": "^1.0.0-pre.44",
+    "esm": "^3.2.25",
     "husky": "^4.3.0",
     "lint-staged": "^10.5.3",
     "ava": "^3.13.0",
@@ -52,6 +55,18 @@
       "pre-commit": "yarn lint-staged",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
+  },
+  "ava": {
+    "files": [
+      "src/**/*.test.ts"
+    ],
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "esm",
+      "ts-node/register/transpile-only"
+    ]
   },
   "commitlint": {
     "plugins": [

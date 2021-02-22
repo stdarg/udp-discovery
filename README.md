@@ -1,12 +1,12 @@
 ts-udp-discovery
 =============
-This module provides discovery services using UDP multicast. udp-discovery
+This module provides discovery services using UDP multicast. ts-udp-discovery
 implements the zero-configuration UDP multicast discovery and works only between
 nodes on the same subnet as typically, broadcast packets don't route.
 
 # Installation
 
-    npm install udp-discovery
+    yarn add ts-udp-discovery
 
 # Example
 

@@ -1,4 +1,4 @@
-import { IServiceObject } from "src/types";
+import { IServiceObject } from "src/types/services";
 
 export const objToJson = {
   jsonParse: <T>(value: string): T | undefined => JSON.parse(value),

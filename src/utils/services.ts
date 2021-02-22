@@ -1,4 +1,5 @@
-import { IServiceObject, TRsInfoObject } from "src/types";
+import { TRsInfoObject } from "src/types/messages";
+import { IServiceObject } from "src/types/services";
 
 export const createServiceObject = (
   name: string,
