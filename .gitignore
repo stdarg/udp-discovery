@@ -22,3 +22,9 @@ results
 npm-debug.log
 node_modules
 yarn.lock
+
+# Build files
+build/**/**.*
+
+# Test files
+test-reports/**.*

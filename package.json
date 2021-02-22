@@ -4,7 +4,7 @@
   "description": "Provides zero-config discovery service using broadcast UDP.",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha --reporter list",
+    "test:ci": "ava --tap | tap-xunit > ./test-reports/ava.xml",
     "build": "tsc -p tsconfig.json",
     "lint-staged": "lint-staged",
     "lint": "eslint ./src --ext .ts"
@@ -43,7 +43,7 @@
     "commitlint-plugin-jira-rules": "^1.4.0",
     "husky": "^4.3.0",
     "lint-staged": "^10.5.3",
-    "mocha": "6.1.4",
+    "ava": "^3.13.0",
     "prettier": "^2.1.2",
     "typescript": "^4.0.5"
   },
