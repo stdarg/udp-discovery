@@ -1,6 +1,6 @@
 {
   "name": "udp-discovery",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Provides zero-config discovery service using broadcast UDP.",
   "main": "index.js",
   "scripts": {
