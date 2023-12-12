@@ -21,7 +21,7 @@
   "author": "Edmond Meinfelder, Ryan Pannell",
   "license": "MIT",
   "dependencies": {
-    "debug": "4.1.1",
+    "debug": "4.3.1",
     "is2": "2.0.1",
     "obj-to-json": "1.0.0"
   },
